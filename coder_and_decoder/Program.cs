@@ -18,67 +18,100 @@ namespace ConsoleApplication
                 {
                     byte[] buffer = new byte[fstream.Length];
                     fstream.Read(buffer, 0, buffer.Length);
-                    byte[] alphabet = buffer.Distinct().ToArray();
-                    
+                    Dictionary<byte,int> alphabet = new Dictionary<byte,int>();
+                    for(byte i=0,j = 255; i <j ; i++)
+                    {
+                        alphabet[i] = 0;
+                        
+                    }
+                    alphabet[255] = 0;
+
                 }
                 break;
             }
 
         }
-        Dictionary<byte, int> Add_Dic(Dictionary<byte, int> Count, byte I)
+
+        void PPMA(byte[] buffer, Dictionary<byte, int> count)
         {
-            if (Count.ContainsKey(I))
-            {
-                Count[I]++;
-            }
-            else
-            {
-                Count.Add(I, 1);
-            }
-            return Count;
-        }
-        void Coder_PPMA(byte[] buffer)
-        {
-            Dictionary<string,List<byte>> Contecst = new Dictionary<string,List<byte>>();
-            Dictionary<byte,int> Count = new Dictionary<byte,int>();
+            Dictionary<string,Dictionary<byte,int>> Contecst = new Dictionary<string, Dictionary<byte, int>>();
             int D = 5;
+            int context_nul = 0;
             string S;
             int c = 0;
-            int PEsc;
-            int PS;
-            for(int i = 0;i< buffer.Length;i++)
+            double PEsc=0;
+            double PS;
+            for (int i = 0; i < buffer.Length; i++)
             {
-                if (c == D)
+                bool flag = false;
+                byte p = buffer[i];
+                if (c != D)
                 {
-                    D = 5;
-                    while (D > 0)
+                    for(int j = c; j > 0; j--)
                     {
-                        S = string.Join(" ", buffer[(i-D)..(i-1)]);
+                        
+                        S = String.Join(" ", buffer[(i - j)..(i)]);
                         if (Contecst.ContainsKey(S))
                         {
-                            if (Contecst[S].Contains(buffer[i]))
+                            if (Contecst[S].ContainsKey(p))
                             {
-                                
+                                PS = Contecst[S][p] / (Contecst[S].Sum(x => x.Value) + 1);
+                                Coder(PS);
+                                Contecst[S][p]++;
+                                break;
                             }
                             else
                             {
-                                
+                                PEsc *= 1 / (Contecst[S].Sum(x => x.Value) + 1);
+                                Contecst[S].Add(p, 1);
+                            }
+                        }
+                       
+                    }
+                    
+                    c++;
+                }
+                else
+                {
+                    for (int j = D; j > 0; j--)
+                    {
+
+                        S = String.Join(" ", buffer[(i - j)..(i)]);
+                        if (Contecst.ContainsKey(S))
+                        {
+                            if (Contecst[S].ContainsKey(p))
+                            {
+                                PS = Contecst[S][p] / (Contecst[S].Sum(x => x.Value) + 1);
+                                Coder(PS);
+                                Contecst[S][p]++;
+                                flag = true;
+                                break;
+                            }
+                            else
+                            {
+                                PEsc *= 1 / (Contecst[S].Sum(x => x.Value) + 1);
+                                Contecst[S].Add(p, 1);
                             }
                         }
                         else
                         {
-                            
-                            D--;
+                            Contecst[S][p] = 1;
                         }
-                        
+
                     }
-                    Count = Add_Dic(Count, buffer[i]);
-                }
-                else
-                {
+                    if (!flag)
+                    {
+
+                    }
 
                 }
             }
+
+        }
+
+        void Coder(double PS)
+        {
+
         }
     }
 }
